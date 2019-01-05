@@ -121,8 +121,3 @@ __less_returnc:
 	ret
 @end
 
-copy
-fill
-halt
-r>r
-swap
