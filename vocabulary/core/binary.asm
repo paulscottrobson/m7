@@ -19,7 +19,7 @@
 	ld 		a,d 									; different. set CS to sign of B
 	add 	a,a 									; if set (negative) B must be < A as A is +ve
 	jr 		__less_returnc
-__less_samsign:
+__less_same	sign:
 	push 	de 										; save DE
 	ex 		de,hl 									; -1 if B < A
 	sbc 	hl,de 									; calculate B - A , hencs CS if < (Carry clear by add a,a)
@@ -55,11 +55,13 @@ __less_returnc:
 	sbc 	hl,de 									; calculate B-A
 	pop 	de 										; restore DE
 	ret
+@end
 
 ; ***************************************************************************************
 
 @word 	*
 	jp  	MULTMultiply16
+@end
 
 ; ***************************************************************************************
 
@@ -69,6 +71,7 @@ __less_returnc:
 	ex 		de,hl
 	pop 	de
 	ret
+@end
 
 ; ***************************************************************************************
 
@@ -95,7 +98,7 @@ __less_returnc:
 	call 	DIVDivideMod16
 	pop 	de
 	ret
-
+@end
 
 ; ***************************************************************************************
 

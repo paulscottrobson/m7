@@ -1,0 +1,3 @@
+python makevocab.py
+
+
