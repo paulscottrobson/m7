@@ -612,6 +612,10 @@ __halt_loop:
 def_73_79_73_2e_73_74_64_68_65_61_64_65_72_72_6f_75_74_69_6e_65:
     call compileCallToSelf
 
+;
+;		The header routine for normal code - compiles a call to the address immediately
+;		following the 'call' to this routine.
+;
 compileCallToSelf:
 		ex 		(sp),hl 							; get the routine addr into HL, old HL on TOS.
 
@@ -627,6 +631,11 @@ compileCallToSelf:
 ; ========= sys.stdmacroroutine word =========
 def_73_79_73_2e_73_74_64_6d_61_63_72_6f_72_6f_75_74_69_6e_65:
     call compileCallToSelf
+
+;
+;		Macro code - compiles the code immediately following the call to this routine.
+;		First byte is the length, subsequent is data.
+;
 
 compileCopySelf: 									; different addresses to tell executable ones.
 		nop
