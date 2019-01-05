@@ -92,3 +92,47 @@ __halt_loop:
 		jr 		__halt_loop
 @end
 
+; ***************************************************************************************
+
+@word 	sys.stdHeaderRoutine
+
+;
+;		The header routine for normal code - compiles a call to the address immediately
+;		following the 'call' to this routine.
+;
+compileCallToSelf:
+		ex 		(sp),hl 							; get the routine addr into HL, old HL on TOS.
+
+		ld 		a,$CD 								; Z80 Call
+		call 	FARCompileByte
+		call 	FARCompileWord
+
+		pop 	hl 									; restore HL and exit
+		ret
+@end
+
+; ***************************************************************************************
+
+@word 	sys.stdMacroRoutine
+
+;
+;		Macro code - compiles the code immediately following the call to this routine.
+;		First byte is the length, subsequent is data.
+;
+
+compileCopySelf: 									; different addresses to tell executable ones.
+		nop
+compileExecutableCopySelf:
+		ex 		(sp),hl 							; routine start into HL, old HL on TOS
+		push 	bc 									; save BC
+		ld 		b,(hl)								; get count
+		inc 	hl
+__copyMacroCode:
+		ld 		a,(hl)								; do next byte
+		call 	FARCompileByte
+		inc 	hl
+		djnz 	__copyMacroCode
+		pop 	bc 									; restore and exit.
+		pop 	hl
+		ret
+@end

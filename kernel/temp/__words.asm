@@ -1,3 +1,37 @@
+; *********************************************************************************
+; *********************************************************************************
+;
+;		File:		console.asm
+;		Purpose:	Console words.
+;		Date : 		5th January 2019
+;		Author:		paul@robsons.org.uk
+;
+; *********************************************************************************
+; *********************************************************************************
+
+; ========= console.setmode word =========
+def_63_6f_6e_73_6f_6c_65_2e_73_65_74_6d_6f_64_65:
+    call compileCallToSelf
+		jp 		GFXMode
+
+; ========= console.char! word =========
+def_63_6f_6e_73_6f_6c_65_2e_63_68_61_72_21:
+    call compileCallToSelf
+		jp 		GFXWriteCharacter
+
+; ========= console.hex! word =========
+def_63_6f_6e_73_6f_6c_65_2e_68_65_78_21:
+    call compileCallToSelf
+		jp 		GFXWriteHexWord
+
+; ========= console.inkey word =========
+def_63_6f_6e_73_6f_6c_65_2e_69_6e_6b_65_79:
+    call compileCallToSelf
+		ex 		de,hl
+		call 	IOScanKeyboard 						; read keyboard
+		ld 		l,a
+		ld 		h,$00
+		ret
 ; ***************************************************************************************
 ; ***************************************************************************************
 ;
@@ -572,6 +606,43 @@ __halt_loop:
 		halt
 		jr 		__halt_loop
 
+; ***************************************************************************************
+
+; ========= sys.stdheaderroutine word =========
+def_73_79_73_2e_73_74_64_68_65_61_64_65_72_72_6f_75_74_69_6e_65:
+    call compileCallToSelf
+
+compileCallToSelf:
+		ex 		(sp),hl 							; get the routine addr into HL, old HL on TOS.
+
+		ld 		a,$CD 								; Z80 Call
+		call 	FARCompileByte
+		call 	FARCompileWord
+
+		pop 	hl 									; restore HL and exit
+		ret
+
+; ***************************************************************************************
+
+; ========= sys.stdmacroroutine word =========
+def_73_79_73_2e_73_74_64_6d_61_63_72_6f_72_6f_75_74_69_6e_65:
+    call compileCallToSelf
+
+compileCopySelf: 									; different addresses to tell executable ones.
+		nop
+compileExecutableCopySelf:
+		ex 		(sp),hl 							; routine start into HL, old HL on TOS
+		push 	bc 									; save BC
+		ld 		b,(hl)								; get count
+		inc 	hl
+__copyMacroCode:
+		ld 		a,(hl)								; do next byte
+		call 	FARCompileByte
+		inc 	hl
+		djnz 	__copyMacroCode
+		pop 	bc 									; restore and exit.
+		pop 	hl
+		ret
 ; ***************************************************************************************
 ; ***************************************************************************************
 ;

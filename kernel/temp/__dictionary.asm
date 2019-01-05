@@ -245,6 +245,30 @@
     db    2
     db    "c@"
 ; ----------------------------------------
+    db    18
+    db    FirstCodePage
+    dw    def_63_6f_6e_73_6f_6c_65_2e_63_68_61_72_21
+    db    13
+    db    "console.char!"
+; ----------------------------------------
+    db    17
+    db    FirstCodePage
+    dw    def_63_6f_6e_73_6f_6c_65_2e_68_65_78_21
+    db    12
+    db    "console.hex!"
+; ----------------------------------------
+    db    18
+    db    FirstCodePage
+    dw    def_63_6f_6e_73_6f_6c_65_2e_69_6e_6b_65_79
+    db    13
+    db    "console.inkey"
+; ----------------------------------------
+    db    20
+    db    FirstCodePage
+    dw    def_63_6f_6e_73_6f_6c_65_2e_73_65_74_6d_6f_64_65
+    db    15
+    db    "console.setmode"
+; ----------------------------------------
     db    9
     db    FirstCodePage
     dw    def_63_6f_70_79
@@ -340,6 +364,18 @@
     dw    def_73_77_61_70
     db    4
     db    "swap"
+; ----------------------------------------
+    db    25
+    db    FirstCodePage
+    dw    def_73_79_73_2e_73_74_64_68_65_61_64_65_72_72_6f_75_74_69_6e_65
+    db    20
+    db    "sys.stdheaderroutine"
+; ----------------------------------------
+    db    24
+    db    FirstCodePage
+    dw    def_73_79_73_2e_73_74_64_6d_61_63_72_6f_72_6f_75_74_69_6e_65
+    db    19
+    db    "sys.stdmacroroutine"
 ; ----------------------------------------
     db    8
     db    FirstCodePage

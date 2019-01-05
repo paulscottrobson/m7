@@ -1,4 +1,5 @@
 TODO
-	- Do compiler routines that are dummies at present
-	- Write other routines.
-	
+	- get it working, check dictionary
+	- write word compile/execute/define/comment code.
+	- add cross page calling 
+			

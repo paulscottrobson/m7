@@ -19,7 +19,7 @@
 	ld 		a,d 									; different. set CS to sign of B
 	add 	a,a 									; if set (negative) B must be < A as A is +ve
 	jr 		__less_returnc
-__less_same	sign:
+__less_samesign:
 	push 	de 										; save DE
 	ex 		de,hl 									; -1 if B < A
 	sbc 	hl,de 									; calculate B - A , hencs CS if < (Carry clear by add a,a)

@@ -34,17 +34,17 @@ DisplayInfo: 										; +8 	Display information
 
 DisplayInformation:
 
-__DIScreenWidth: 									; +0 	screen width
+SIScreenWidth: 										; +0 	screen width
+		db 		0,0,0,0	
+SIScreenHeight:										; +4 	screen height
 		db 		0,0,0,0
-__DIScreenHeight:									; +4 	screen height
-		db 		0,0,0,0
-__DIScreenSize:										; +8 	char size of screen
+SIScreenSize:										; +8 	char size of screen
 		dw 		0,0		
-__DIScreenMode:										; +12 	current mode
+SIScreenMode:										; +12 	current mode
 		db 		0,0,0,0
-__DIFontBase:										; font in use
+SIFontBase:											; font in use
 		dw 		AlternateFont
-__DIScreenDriver:									; Screen Driver
+SIScreenDriver:										; Screen Driver
 		dw 		0	
 
 ; ***************************************************************************************

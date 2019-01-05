@@ -46,12 +46,13 @@ stop:	jp 		stop
 		include "support/divide.asm" 				; 16 bit divide (not used in kernel)
 		include "support/farmemory.asm" 			; far memory routines
 		include "support/paging.asm" 				; page switcher (not while executing)
+		include "console/graphics.asm"				; graphic routines
+		include "console/keyboard.asm"				; keyboard I/O
+		include "console/screen48k.asm" 			; drivers
+		include "console/screen_layer2.asm"
+		include "console/screen_lores.asm"
 		include "temp/__words.asm"					; vocabulary file.
 		
 AlternateFont:										; nicer font
 		include "font.inc" 							; can be $3D00 here to save memory
 		include "data.asm"		
-
-compileCallToSelf:
-compileCopySelf:
-compileExecutableCopySelf:
