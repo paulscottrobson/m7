@@ -20,6 +20,7 @@ class MemoryImage(object):
 		self.sysInfo = self.read(0,0x8004)+self.read(0,0x8005)*256
 		self.currentPage = 	self.read(0,self.sysInfo+2)
 		self.currentAddress = self.read(0,self.sysInfo+0)+self.read(0,self.sysInfo+1)*256
+		self.echo = True
 	#
 	#		Return sys.info address
 	#
@@ -71,7 +72,21 @@ class MemoryImage(object):
 		self.image[self.address(page,address)] = data
 		if page >= self.read(0,self.sysInfo+4):
 			self.write(0,self.sysInfo+4,page+1)
-
+	#
+	#		Write byte/word
+	#
+	def cByte(self,data):
+		self.write(self.currentPage,self.currentAddress,data)
+		if self.echo:
+			print("{0:02x}:{1:04x}   {2:02x}".format(self.currentPage,self.currentAddress,data))
+		self.currentAddress += 1
+	#
+	def cWord(self,data):
+		self.write(self.currentPage,self.currentAddress,data & 0xFF)
+		self.write(self.currentPage+1,self.currentAddress,data >> 8)
+		if self.echo:
+			print("{0:02x}:{1:04x}   {2:04x}".format(self.currentPage,self.currentAddress,data))
+		self.currentAddress += 2
 	#
 	#		Expand physical size of image to include given address
 	#
@@ -107,6 +122,21 @@ class MemoryImage(object):
 			p = p + self.read(self.dictionaryPage(),p)
 		return p
 	#
+	#		Extract the dictionary
+	#
+	def getDictionary(self):
+		dictionary = {}
+		dp = self.dictionaryPage()
+		p = 0xC000
+		while self.read(dp,p) != 0:
+			name = ""
+			for i in range(0,self.read(dp,p+4)):
+				name += chr(self.read(dp,p+5+i))
+			entry = { "name":name,"page":self.read(dp,p+1),"address":self.read(dp,p+2)+256*self.read(dp,p+3)}
+			p = p + self.read(dp,p)
+			dictionary[name] = entry
+		return dictionary		
+	#
 	#		Write the image file out.
 	#
 	def save(self,fileName = None):
@@ -121,7 +151,8 @@ class MemoryImage(object):
 		h.close()
 
 if __name__ == "__main__":
-	z = SystemImage()
+	z = MemoryImage()
 	print(len(z.image))
 	print(z.address(z.dictionaryPage(),0xC000))
-	z.save()
+	print(z.getDictionary())
+	#	z.save()

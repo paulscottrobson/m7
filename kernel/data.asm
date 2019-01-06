@@ -58,7 +58,7 @@ __PAGEStackPointer: 								; stack used for switching pages
 __PAGEStackBase:
 		ds 		16
 
-
 FreeMemory:		
+
 		org 	$C000
 		include	"temp/__dictionary.asm"

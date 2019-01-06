@@ -226,6 +226,7 @@ def_6e_6f_74:
 		ld 		a,l
 		cpl
 		ld 		l,a
+		ret
 ; ***************************************************************************************
 ; ***************************************************************************************
 ;
@@ -611,12 +612,13 @@ __halt_loop:
 ; ========= sys.stdheaderroutine word =========
 def_73_79_73_2e_73_74_64_68_65_61_64_65_72_72_6f_75_74_69_6e_65:
     call compileCallToSelf
-
+compileCallToSelf:
+		jp 		__compileCallToSelf
 ;
 ;		The header routine for normal code - compiles a call to the address immediately
 ;		following the 'call' to this routine.
 ;
-compileCallToSelf:
+__compileCallToSelf:
 		ex 		(sp),hl 							; get the routine addr into HL, old HL on TOS.
 
 		ld 		a,$CD 								; Z80 Call
@@ -631,15 +633,23 @@ compileCallToSelf:
 ; ========= sys.stdmacroroutine word =========
 def_73_79_73_2e_73_74_64_6d_61_63_72_6f_72_6f_75_74_69_6e_65:
     call compileCallToSelf
+compileCopySelf:
+		jp 		__compileCopySelf
+
+; ========= sys.stdexecmacroroutine word =========
+def_73_79_73_2e_73_74_64_65_78_65_63_6d_61_63_72_6f_72_6f_75_74_69_6e_65:
+    call compileCallToSelf
+compileExecutableCopySelf:
+		jp 		__compileExecutableCopySelf
 
 ;
 ;		Macro code - compiles the code immediately following the call to this routine.
 ;		First byte is the length, subsequent is data.
 ;
 
-compileCopySelf: 									; different addresses to tell executable ones.
+__compileCopySelf: 									; different addresses to tell executable ones.
 		nop
-compileExecutableCopySelf:
+__compileExecutableCopySelf:
 		ex 		(sp),hl 							; routine start into HL, old HL on TOS
 		push 	bc 									; save BC
 		ld 		b,(hl)								; get count
@@ -652,6 +662,7 @@ __copyMacroCode:
 		pop 	bc 									; restore and exit.
 		pop 	hl
 		ret
+
 ; ***************************************************************************************
 ; ***************************************************************************************
 ;

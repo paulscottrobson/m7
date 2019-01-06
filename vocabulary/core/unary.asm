@@ -131,4 +131,5 @@ __negate:
 		ld 		a,l
 		cpl
 		ld 		l,a
+		ret
 @end
