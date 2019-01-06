@@ -4,7 +4,7 @@
 #		Name : 		m7c.py
 #		Author :	Paul Robson (paul@robsons.org.uk)
 #		Date :		6th January 2019
-#		Purpose :	A very basic M7 compiler.
+#		Purpose :	Python M7 compiler.
 #
 # ***************************************************************************************
 # ***************************************************************************************
@@ -63,9 +63,7 @@ class Compiler(object):
 			for c in cmd[1:]:												# text
 				self.binary.cByte(ord(c) if c != "_" else 32)
 			self.binary.cByte(0x00)											# ASCIIZ
-			self.binary.cByte(0xEB)											# ex de,hl
-			self.binary.cByte(0x21)											# ld hl,xxxx
-			self.binary.cWord(address)
+			self.loadConstant(address)
 			return
 
 		cmd = cmd.lower()													# case irrelevant outside string
@@ -73,16 +71,59 @@ class Compiler(object):
 		#		Constant
 		#
 		if re.match("^\-?\d+$",cmd) is not None:
-			self.binary.cByte(0xEB)											# ex de,hl
-			self.binary.cByte(0x21)											# ld hl,xxxx
-			self.binary.cWord(int(cmd) & 0xFFFF)
+			self.loadConstant(int(cmd))
 			return
 		#
-		# TODO: Structures
-		# TODO: Modifiers
-		# TODO: Other immediates (e.g. >compiles : )
+		# 		Structures
 		#
-		#		Words in dictionary
+		if cmd == "if" or cmd == "-if":
+			self.ifBranch = self.compileBranch(cmd.startswith("-"))
+			return
+		if cmd == "then":			
+ 			self.setBranch(self.ifBranch,self.binary.getCodeAddress())
+ 			return
+		if cmd == "begin":
+ 			self.beginLoop = self.binary.getCodeAddress()
+ 			return
+		if cmd == "-until" or cmd == "until":
+ 			br = self.compileBranch(cmd.startswith("-"))
+ 			self.setBranch(br,self.beginLoop)
+ 			return
+		if cmd == "for" or cmd == "next" or cmd == "i":
+			self.forCompile(cmd)
+			return
+ 		#
+		# 		Modifiers !! and @@
+		#
+		if cmd == "!!" or cmd == "@@":
+			p = self.binary.getCodePage()
+			if cmd == "!!":
+				self.binary.write(p,self.binary.getCodeAddress()-4,0x00)	# nop
+				self.binary.write(p,self.binary.getCodeAddress()-3,0x22)	# ld (xxxx),hl
+			else:
+				self.binary.write(p,self.binary.getCodeAddress()-3,0x2A)	# ld hl,(xxxx)
+			return
+		#
+		# 		Immediate words :<name> and compiles>
+		#
+		if cmd.startswith(":") and cmd != ":":
+																			# build record
+			newFunc = { "name":cmd[1:],"page":self.binary.getCodePage(),"address":self.binary.getCodeAddress() }			
+			if newFunc["name"] in self.dictionary:							# check duplication
+				raise CompilerException("Name duplicated {0}".format(newFunc["name"]))
+			self.dictionary[newFunc["name"]] = newFunc						# add to compiler dict
+			if not newFunc["name"].startswith("_"): 						# add to binary if not _
+				self.binary.addDictionary(newFunc["name"],newFunc["page"],newFunc["address"])
+			self.binary.cByte(0xCD)											# call
+			self.binary.cWord(self.standardHeader+3)						# +3 for code not header
+			return
+		#
+		if cmd == "compiles>":
+			self.binary.setCodeAddress(self.binary.getCodeAddress()-3)		# unpicks the header.
+			return
+		#
+		#		Words in dictionary. Identify what to do by examining the compiler call
+		#		if there isn't one, we can't compile it (without emulating a Z80 !)
 		#
 		if cmd in self.dictionary:
 			page = self.dictionary[cmd]["page"]								# get word position
@@ -104,11 +145,66 @@ class Compiler(object):
 				raise CompilerException("Unknown compilation code for "+cmd)
 			return
 		raise CompilerException("Unknown word "+cmd)
+	#
+	#		Load a constant into A, A->B first
+	#	
+	def loadConstant(self,const):
+		self.binary.cByte(0xEB)												# ex de,hl
+		self.binary.cByte(0x21)												# ld hl,xxxx
+		self.binary.cWord(const & 0xFFFF)
+	#
+	#		Compile a branch with test but no target
+	#
+	def compileBranch(self,negativeTest):
+		if negativeTest:
+			self.binary.cByte(0xCB)											# bit 7,h
+			self.binary.cByte(0x7C)
+		else:
+			self.binary.cByte(0x7C)											# ld a,h
+			self.binary.cByte(0xB5)											# or l
+		self.binary.cByte(0xCA)												# jp z,xxxx
+		self.binary.cWord(self.binary.getCodeAddress())
+		return self.binary.getCodeAddress() - 2
+	#
+	#		Update the branch target
+	#
+	def setBranch(self,branch,target):
+		self.binary.write(self.binary.getCodePage(),branch,target & 0xFF)
+		self.binary.write(self.binary.getCodePage(),branch+1,target >> 8)
+	#
+	#		For loop code
+	#
+	def forCompile(self,cmd):
+		if cmd == "for":
+			self.forLoop = self.binary.getCodePage()
+			self.binary.cByte(0x2B)											# dec hl
+			self.binary.cByte(0xE5)											# push hl
+		if cmd == "i":
+			self.binary.cByte(0xE1)											# pop hl
+			self.binary.cByte(0xE5)											# push hl
+		if cmd == "next":
+			self.binary.cByte(0xE1)											# pop hl
+			self.binary.cByte(0x7C)											# ld a,h
+			self.binary.cByte(0xB5)											# or l
+			self.binary.cByte(0xC2)											# jp nz,xxxx
+			self.binary.cWord(self.forLoop)
 
 if __name__ == "__main__":
 	src = """
 		pop 	not 	a>c 	-42 // hello
-		"hel_lo
+		"hel_lo 
+		42 @@ 43 !! 
+		if 1 then
+		-if 1 then
+		begin 2 until
+		begin 3 -until
+		10 for i next
+		:test 42 ;
+		test 4 test
 """.split("\n")
 	cc = Compiler()
 	cc.compileArray(src)
+	cc.binary.save()
+
+#TODO: 	main() assignment (and main code in kernel)
+#		file compilation

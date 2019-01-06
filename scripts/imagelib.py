@@ -48,6 +48,8 @@ class MemoryImage(object):
 		return self.currentPage
 	def getCodeAddress(self):
 		return self.currentAddress
+	def setCodeAddress(self,addr):
+		self.currentAddress = addr
 	#
 	#		Convert a page/z80 address to an address in the image
 	#
@@ -83,7 +85,7 @@ class MemoryImage(object):
 	#
 	def cWord(self,data):
 		self.write(self.currentPage,self.currentAddress,data & 0xFF)
-		self.write(self.currentPage+1,self.currentAddress,data >> 8)
+		self.write(self.currentPage,self.currentAddress+1,data >> 8)
 		if self.echo:
 			print("{0:02x}:{1:04x}   {2:04x}".format(self.currentPage,self.currentAddress,data))
 		self.currentAddress += 2
