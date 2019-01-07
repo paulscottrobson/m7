@@ -39,6 +39,7 @@ __less_returnc:
 	xor 	d
 	ld 		h,a
 	ld 		a,l 									; A = (L ^ E) | (H ^ D)
+	xor 	e
 	or 		h 										; if A == 0 they are the same.
 	ld 		hl,$0000 								; return 0 if different
 	ret 	nz

@@ -253,27 +253,27 @@
 ; ----------------------------------------
     db    18
     db    FirstCodePage
-    dw    def_63_6f_6e_73_6f_6c_65_2e_63_68_61_72_21
+    dw    def_63_6f_6e_2e_72_61_77_2e_63_68_61_72_21
     db    13
-    db    "console.char!"
+    db    "con.raw.char!"
 ; ----------------------------------------
     db    17
     db    FirstCodePage
-    dw    def_63_6f_6e_73_6f_6c_65_2e_68_65_78_21
+    dw    def_63_6f_6e_2e_72_61_77_2e_68_65_78_21
     db    12
-    db    "console.hex!"
+    db    "con.raw.hex!"
 ; ----------------------------------------
     db    18
     db    FirstCodePage
-    dw    def_63_6f_6e_73_6f_6c_65_2e_69_6e_6b_65_79
+    dw    def_63_6f_6e_2e_72_61_77_2e_69_6e_6b_65_79
     db    13
-    db    "console.inkey"
+    db    "con.raw.inkey"
 ; ----------------------------------------
     db    20
     db    FirstCodePage
-    dw    def_63_6f_6e_73_6f_6c_65_2e_73_65_74_6d_6f_64_65
+    dw    def_63_6f_6e_2e_72_61_77_2e_73_65_74_6d_6f_64_65
     db    15
-    db    "console.setmode"
+    db    "con.raw.setmode"
 ; ----------------------------------------
     db    9
     db    FirstCodePage

@@ -1,15 +1,136 @@
-:sys.info 32772 @ ;											// system info base
-:disp.info a>r sys.info 8 + @ r>b ; 						// display info base
 
-:_debug_out swap c>a console.hex! 5 + a>c ; 				// write a at c and go forward 5
+:sys.info 32772 @ ;											// system info base
+:display.info a>r sys.info 8 + @ r>b ; 						// display info base
+
+:_debug_out swap c>a con.raw.hex! 5 + a>c ; 				// write a at c and go forward 5
 
 :debug 
 	abc>r c>r b>r a>r 										// save regs and save for print
-	disp.info 8 + @ -14 + push a>c 							// address of last 32 chars
-	14 for 288 c>b swap console.char! ++ a>c next 			// clear bottom line.
+	display.info 8 + @ -14 + push a>c 						// address of last 32 chars
+	14 for 288 c>b swap con.raw.char! ++ a>c next 			// clear bottom line.
 	pop a>c r>a _debug_out r>a _debug_out r>a _debug_out 	// restore bottom and out a b c
 	r>abc													// restore registers
 ;
+
+:h a>r sys.info r>b ;										// address of pointer to location.
+:here h @ ;													// Value of pointer to location.
+
+:min ab>r < if r>ab b>a ; then r>ab ;						// Min of A/B
+:max ab>r < if r>ab ; then r>ab b>a ;						// Max of A/B
+
+:_con.colour 	variable 									// Writing colour in high byte.
+:_con.pos 		variable 									// Screen position
+:_con.base 		variable 									// Integer display base.
+
+:con.colour ab>r 7 and bswap _con.colour !! r>ab ;
+
+:con.blue ab>r 1 con.colour r>ab  ;
+:con.red ab>r  2 con.colour r>ab  ;
+:con.magenta ab>r  3 con.colour r>ab  ;
+:con.green ab>r  4 con.colour r>ab  ;
+:con.cyan ab>r  5 con.colour r>ab  ;
+:con.yellow ab>r  6 con.colour r>ab  ;
+:con.white ab>r 7 con.colour r>ab ;
+
+:con.border abc>r 254 a>c _con.colour @@ bswap p! r>abc ;
+
+:con.home ab>r 0 _con.pos !! r>ab ;
+
+:con.clear 
+	ab>r
+		con.white 0 con.home 
+		display.info 12 + @ con.raw.setmode
+	r>ab
+;
+
+:con.emit.raw
+	255 and _con.colour @@ + _con.pos @@ con.raw.char! 
+	1 _con.pos +!	
+	display.info 8 + @ -64 + _con.pos @@ = if con.clear then 
+;
+
+:con.cr
+	ab>r 
+	begin 
+		32 con.emit.raw 
+		display.info @ -- _con.pos @@ and 0=
+	until
+	r>ab
+;
+
+:_con.emit
+	128 and if ; then
+	swap 13 = if con.cr ; then
+	swap 32 < if ; then	
+	swap con.emit.raw
+;
+
+:con.emit 
+	ab>r _con.emit r>ab 
+;
+
+:con.space 
+	ab>r 32 con.emit r>ab ;
+:con.spaces ab>r 
+	if for con.space next then r>ab ;
+
+:_con.print.string
+	swap
+	begin
+		b>a c@ 0= if ; then
+		b>a c@ con.emit
+		swap ++ 0
+	until
+;
+
+:con.print.string ab>r _con.print.string r>ab ;
+
+:_con.digit	10 < 0= if swap 39 + swap then swap 48 + con.emit ;
+
+:_con.rec.print 
+	ab>r _con.base @@ / if _con.rec.print then r>ab _con.base @@ mod _con.digit ;
+
+:_con.print -if - _con.rec.print 45 con.emit ; then  _con.rec.print ;
+
+:con.print.hex
+	ab>r a>r 16 _con.base !! r>a _con.print r>ab ;
+:con.print.dec
+	ab>r a>r 10 _con.base !! r>a _con.print r>ab ;
+:con.print.bin
+	ab>r a>r 2 _con.base !! r>a _con.print r>ab ;
+
+:_con.print.nibble 15 and _con.digit ;
+
+:con.print.byte ab>r a>r 2/ 2/ 2/ 2/ _con.print.nibble r>a _con.print.nibble r>ab ;
+
+:con.print.word bswap con.print.byte bswap con.print.byte ;
+
+:_con.keyboard.state variable
+
+:_con.get.change
+	begin con.raw.inkey _con.keyboard.state @@ = 0= until swap _con.keyboard.state !! ;
+:con.get
+	begin _con.get.change until ;
+
+:_dump.line 
+	con.yellow con.print.word
+	con.cyan 8 for b>a c@ con.space con.print.byte swap ++ swap next b>a con.cr 
+;
+
+:con.dump 
+	b>r 8 for swap _dump.line swap next swap r>b ;
+
+
 :main  
+	1 con.raw.setmode
 	49443 a>c 46712 43983
+
+	con.clear con.blue con.border
+	42 con.emit.raw 0 con.spaces 43 con.emit.raw	
+	con.yellow "hello_world con.print.string con.green
+	32766 con.print.hex con.cr con.print.dec con.cr con.print.bin con.cr
+	con.red con.print.byte con.cr con.print.word
+	con.cyan 0 con.dump
+	begin con.get con.print.word con.cr 0 until
+
 	debug halt	;

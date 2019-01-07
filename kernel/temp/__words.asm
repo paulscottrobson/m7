@@ -1,31 +1,31 @@
 ; *********************************************************************************
 ; *********************************************************************************
 ;
-;		File:		console.asm
-;		Purpose:	Console words.
+;		File:		con.raw.asm
+;		Purpose:	con.raw words.
 ;		Date : 		5th January 2019
 ;		Author:		paul@robsons.org.uk
 ;
 ; *********************************************************************************
 ; *********************************************************************************
 
-; ========= console.setmode word =========
-def_63_6f_6e_73_6f_6c_65_2e_73_65_74_6d_6f_64_65:
+; ========= con.raw.setmode word =========
+def_63_6f_6e_2e_72_61_77_2e_73_65_74_6d_6f_64_65:
     call compileCallToSelf
 		jp 		GFXMode
 
-; ========= console.char! word =========
-def_63_6f_6e_73_6f_6c_65_2e_63_68_61_72_21:
+; ========= con.raw.char! word =========
+def_63_6f_6e_2e_72_61_77_2e_63_68_61_72_21:
     call compileCallToSelf
 		jp 		GFXWriteCharacter
 
-; ========= console.hex! word =========
-def_63_6f_6e_73_6f_6c_65_2e_68_65_78_21:
+; ========= con.raw.hex! word =========
+def_63_6f_6e_2e_72_61_77_2e_68_65_78_21:
     call compileCallToSelf
 		jp 		GFXWriteHexWord
 
-; ========= console.inkey word =========
-def_63_6f_6e_73_6f_6c_65_2e_69_6e_6b_65_79:
+; ========= con.raw.inkey word =========
+def_63_6f_6e_2e_72_61_77_2e_69_6e_6b_65_79:
     call compileCallToSelf
 		ex 		de,hl
 		call 	IOScanKeyboard 						; read keyboard
@@ -76,6 +76,7 @@ def_3d:
 	xor 	d
 	ld 		h,a
 	ld 		a,l 									; A = (L ^ E) | (H ^ D)
+	xor 	e
 	or 		h 										; if A == 0 they are the same.
 	ld 		hl,$0000 								; return 0 if different
 	ret 	nz

@@ -1,27 +1,27 @@
 ; *********************************************************************************
 ; *********************************************************************************
 ;
-;		File:		console.asm
-;		Purpose:	Console words.
+;		File:		con.raw.asm
+;		Purpose:	con.raw words.
 ;		Date : 		5th January 2019
 ;		Author:		paul@robsons.org.uk
 ;
 ; *********************************************************************************
 ; *********************************************************************************
 
-@word 	console.setmode
+@word 	con.raw.setmode
 		jp 		GFXMode
 @end
 
-@word 	console.char!
+@word 	con.raw.char!
 		jp 		GFXWriteCharacter
 @end
 
-@word 	console.hex!
+@word 	con.raw.hex!
 		jp 		GFXWriteHexWord
 @end
 
-@word 	console.inkey
+@word 	con.raw.inkey
 		ex 		de,hl
 		call 	IOScanKeyboard 						; read keyboard
 		ld 		l,a

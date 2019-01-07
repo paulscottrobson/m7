@@ -19,6 +19,8 @@ GFXMode:
 		push 	bc
 		push 	de
 		push 	hl
+		ld 		a,l 								; save new mode.
+		ld 		(SIScreenMode),a
 		dec 	l 									; L = 1 mode layer2
 		jr 		z,__GFXLayer2
 		dec 	l

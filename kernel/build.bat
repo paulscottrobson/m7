@@ -2,7 +2,8 @@
 rem
 rem		Tidy up
 rem
-rm boot.img ..\files\*.img 
+del /Q boot.img 
+del /Q ..\files\*.img 
 rem
 rem		Build the bootloader
 rem
