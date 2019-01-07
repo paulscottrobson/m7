@@ -1,6 +1,6 @@
               	; --------------------------------------
               	; zasm: assemble "kernel.asm"
-              	; date: 2019-01-07 09:54:03
+              	; date: 2019-01-07 10:39:56
               	; --------------------------------------
 
 
@@ -2831,5 +2831,5 @@ start_73_77_61_70       = $85F8 = 34296          __words.asm:706
 variableAddressCompiler = $85DF = 34271          __words.asm:672 (unused)
 
 
-total time: 0.0087 sec.
+total time: 0.0086 sec.
 no errors

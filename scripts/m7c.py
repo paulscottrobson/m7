@@ -10,14 +10,15 @@
 # ***************************************************************************************
 
 from imagelib import *
-import re
+import re,os,sys
 
 # ***************************************************************************************
 #								Exception for Compiler
 # ***************************************************************************************
 
 class CompilerException(Exception):
-	pass
+	def __init__(self,msg):
+		self.errorMessage = "{0} ({1}:{2})".format(msg,CompilerException.FILENAME,CompilerException.LINENUMBER)
 
 CompilerException.LINENUMBER = 0
 CompilerException.FILENAME = ""
@@ -38,13 +39,29 @@ class Compiler(object):
 		self.macroHeader = self.dictionary["sys.stdmacroroutine"]["address"]
 		self.macroExecHeader = self.dictionary["sys.stdexecmacroroutine"]["address"]
 		self.variableHandler = self.dictionary["sys.variableroutine"]["address"]
+
+		#self.binary.echo = False
+	#
+	#		Compile a file
+	#
+	def compileFile(self,fileName):
+		try:
+			CompilerException.FILENAME = fileName
+			src = open(fileName).readlines()
+			self.compileArray(src)
+		except FileNotFoundError:
+			print("Couldn't compile file "+fileName)
+			sys.exit(1)
+		except CompilerException as cex:
+			print(cex.errorMessage)
+			sys.exit(1)
 	#
 	#		Compile a string array
 	#
 	def compileArray(self,source):
 		for ln in range(0,len(source)):										# go through all lines
 			CompilerException.LINENUMBER = ln + 1							# update current line
-			line = source[ln].replace("\t"," ")								# remove TAB
+			line = source[ln].replace("\t"," ").strip()						# remove TAB
 			line = line if line.find("//") < 0 else line[:line.find("//")]	# remove comment
 			for cmd in [x for x in line.split(" ") if x != ""]:				# compile all bits
 				self.compile(cmd)
@@ -160,7 +177,7 @@ class Compiler(object):
 			else:															# some other wierd word.
 				raise CompilerException("Unknown compilation code for "+cmd)
 			return
-		raise CompilerException("Unknown word "+cmd)
+		raise CompilerException("Unknown word '{0}'".format(cmd))
 	#
 	#		Load a constant into A, A->B first
 	#	
@@ -206,29 +223,15 @@ class Compiler(object):
 			self.binary.cWord(self.forLoop)
 
 if __name__ == "__main__":
-	src = """
-		:sys.info 32772 @ ;											// system info base
-		:disp.info a>r sys.info 8 + @ r>b ; 						// display info base
-
-		:_debug_out swap c>a console.hex! 5 + a>c ; 				// write a at c and go forward 5
-
-		:debug 
-			abc>r c>r b>r a>r 										// save regs and save for print
-			disp.info 8 + @ -14 + push a>c 							// address of last 32 chars
-			14 for 288 c>b swap console.char! ++ a>c next 			// clear bottom line.
-			pop a>c r>a _debug_out r>a _debug_out r>a _debug_out 	// restore bottom and out a b c
-			r>abc													// restore registers
-		;
-		:main  
-			49443 a>c 46712 43983
-			debug halt	;
-
-""".split("\n")
+	print("*** M7 Python Compiler ***")
 	cc = Compiler()
-	cc.compileArray(src)
+	cc.binary.echo = False
+	for f in sys.argv[1:]:
+		print("\tCompiling '"+f+"'")
+		cc.compileFile(f)
 	cc.binary.save()
+	print("Saved binary.")
+	sys.exit(0)
 
 # TODO:
-#		file compilation
-#		error handling.
 # 		test words.

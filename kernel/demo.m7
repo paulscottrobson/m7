@@ -1,0 +1,15 @@
+:sys.info 32772 @ ;											// system info base
+:disp.info a>r sys.info 8 + @ r>b ; 						// display info base
+
+:_debug_out swap c>a console.hex! 5 + a>c ; 				// write a at c and go forward 5
+
+:debug 
+	abc>r c>r b>r a>r 										// save regs and save for print
+	disp.info 8 + @ -14 + push a>c 							// address of last 32 chars
+	14 for 288 c>b swap console.char! ++ a>c next 			// clear bottom line.
+	pop a>c r>a _debug_out r>a _debug_out r>a _debug_out 	// restore bottom and out a b c
+	r>abc													// restore registers
+;
+:main  
+	49443 a>c 46712 43983
+	debug halt	;
