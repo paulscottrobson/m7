@@ -205,6 +205,12 @@
 ; ----------------------------------------
     db    10
     db    FirstCodePage
+    dw    def_62_72_65_61_6b
+    db    5
+    db    "break"
+; ----------------------------------------
+    db    10
+    db    FirstCodePage
     dw    def_62_73_77_61_70
     db    5
     db    "bswap"

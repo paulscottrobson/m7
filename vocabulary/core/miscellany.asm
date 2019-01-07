@@ -158,3 +158,10 @@ variableAddressCompiler:
 		call 	FARCompileWord
 		ret
 @end
+
+; ***************************************************************************************
+
+@macro 	break
+		db 		$DD,$01
+@end
+

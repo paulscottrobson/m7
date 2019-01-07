@@ -39,8 +39,6 @@ Boot:	ld 		sp,StackTop							; reset Z80 Stack
 		ld 		a,0 								; set Mode 0 (standard 48k Spectrum + Sprites)
 		call 	GFXMode
 
-		db 		$DD,$01
-
 		ld 		a,(BootPage)						; switch to boot page.
 		call 	PAGEInitialise
 		ld 		ix,(BootAddress)					; start address

@@ -1,7 +1,7 @@
 #
 #		Tidy up
 #
-rm boot.img ../files/boot.img 
+rm boot.img ../files/*.img 
 #
 #		Build the bootloader
 #
@@ -23,5 +23,5 @@ zasm -buw kernel.asm -o boot.img -l boot.lst
 #
 if [ -e boot.img ]
 then
-	cp boot.img ../files
+	cp boot.img ../files/boot_clean.img
 fi

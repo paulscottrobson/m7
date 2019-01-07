@@ -192,7 +192,7 @@ class Compiler(object):
 	#
 	def forCompile(self,cmd):
 		if cmd == "for":
-			self.forLoop = self.binary.getCodePage()
+			self.forLoop = self.binary.getCodeAddress()
 			self.binary.cByte(0x2B)											# dec hl
 			self.binary.cByte(0xE5)											# push hl
 		if cmd == "i":
@@ -207,19 +207,22 @@ class Compiler(object):
 
 if __name__ == "__main__":
 	src = """
-		pop 	not 	a>c 	-42 // hello
-		"hel_lo 
-		42 @@ 43 !! 
-		if 1 then
-		-if 1 then
-		begin 2 until
-		begin 3 -until
-		10 for i next
-		:test 42 ;
-		test 4 test
-		:v1 variable
-		v1
-		:main 32766 1 console.hex! halt
+		:sys.info 32772 @ ;											// system info base
+		:disp.info a>r sys.info 8 + @ r>b ; 						// display info base
+
+		:_debug_out swap c>a console.hex! 5 + a>c ; 				// write a at c and go forward 5
+
+		:debug 
+			abc>r c>r b>r a>r 										// save regs and save for print
+			disp.info 8 + @ -14 + push a>c 							// address of last 32 chars
+			14 for 288 c>b swap console.char! ++ a>c next 			// clear bottom line.
+			pop a>c r>a _debug_out r>a _debug_out r>a _debug_out 	// restore bottom and out a b c
+			r>abc													// restore registers
+		;
+		:main  
+			49443 a>c 46712 43983
+			debug halt	;
+
 """.split("\n")
 	cc = Compiler()
 	cc.compileArray(src)
@@ -227,5 +230,5 @@ if __name__ == "__main__":
 
 # TODO:
 #		file compilation
-#		debug routine 
 #		error handling.
+# 		test words.

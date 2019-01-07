@@ -1,4 +1,5 @@
 sh build.sh
+cp ../files/boot_clean.img boot.img
 python ../scripts/m7c.py
 if [ -e boot.img ]
 then
