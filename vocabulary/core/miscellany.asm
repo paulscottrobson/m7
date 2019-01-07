@@ -145,3 +145,16 @@ __copyMacroCode:
 		pop 	hl
 		ret
 
+
+; ***************************************************************************************
+
+@word 	sys.variableRoutine
+variableAddressCompiler:
+		ld 		a,$EB 								; ex de,hl
+		call 	FARCompileByte
+		ld 		a,$21								; ld hl,xxxxx
+		call 	FARCompileByte
+		pop 	hl 									; var address
+		call 	FARCompileWord
+		ret
+@end

@@ -38,9 +38,19 @@ Boot:	ld 		sp,StackTop							; reset Z80 Stack
 
 		ld 		a,0 								; set Mode 0 (standard 48k Spectrum + Sprites)
 		call 	GFXMode
-;		jp 		BUFFScan 							; scan the buffers
 
-stop:	jp 		stop
+		db 		$DD,$01
+
+		ld 		a,(BootPage)						; switch to boot page.
+		call 	PAGEInitialise
+		ld 		ix,(BootAddress)					; start address
+		ld 		hl,0								; zero ABC
+		ld 		de,0
+		ld 		bc,0
+		jp 		(ix)
+
+StopDefault:	
+		jp 		StopDefault
 
 		include "support/multiply.asm" 				; 16 bit multiply (not used in kernel)
 		include "support/divide.asm" 				; 16 bit divide (not used in kernel)

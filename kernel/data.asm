@@ -25,7 +25,11 @@ NextFreePage: 										; +4 	Next available code page (2 8k pages/page)
 		db 		FirstCodePage+2,0,0,0
 DisplayInfo: 										; +8 	Display information
 		dw 		DisplayInformation,0		
-
+BootAddress:										; +12 	Boot Address
+		dw 		StopDefault
+BootPage:											; +14 	Boot Page
+		db 		FirstCodePage,0
+		
 ; ***************************************************************************************
 ;
 ;							 Display system information

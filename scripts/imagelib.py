@@ -139,6 +139,14 @@ class MemoryImage(object):
 			dictionary[name] = entry
 		return dictionary		
 	#
+	#		Set boot
+	#
+	def setBoot(self,page,address):
+		self.write(0,self.sysInfo+12,address & 0xFF)
+		self.write(0,self.sysInfo+13,address >> 8)
+		self.write(0,self.sysInfo+14,page)
+		self.write(0,self.sysInfo+15,0)
+	#
 	#		Write the image file out.
 	#
 	def save(self,fileName = None):

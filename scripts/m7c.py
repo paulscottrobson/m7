@@ -37,6 +37,7 @@ class Compiler(object):
 		self.standardHeader = self.dictionary["sys.stdheaderroutine"]["address"]
 		self.macroHeader = self.dictionary["sys.stdmacroroutine"]["address"]
 		self.macroExecHeader = self.dictionary["sys.stdexecmacroroutine"]["address"]
+		self.variableHandler = self.dictionary["sys.variableroutine"]["address"]
 	#
 	#		Compile a string array
 	#
@@ -48,7 +49,8 @@ class Compiler(object):
 			for cmd in [x for x in line.split(" ") if x != ""]:				# compile all bits
 				self.compile(cmd)
 	#
-	#		Compile a single command
+	#		Compile a single command. Red words are prefixed with ':', other words
+	# 		are green, except for compiles> which is handled seperately.
 	#
 	def compile(self,cmd):
 		if self.binary.echo:												# headline
@@ -93,7 +95,7 @@ class Compiler(object):
 			self.forCompile(cmd)
 			return
  		#
-		# 		Modifiers !! and @@
+		# 		Modifiers !! and @@ hack the ex de,hl ; ld hl,xxxx sequence.
 		#
 		if cmd == "!!" or cmd == "@@":
 			p = self.binary.getCodePage()
@@ -104,9 +106,9 @@ class Compiler(object):
 				self.binary.write(p,self.binary.getCodeAddress()-3,0x2A)	# ld hl,(xxxx)
 			return
 		#
-		# 		Immediate words :<name> and compiles>
+		# 		Immediate words :<name> variable and compiles>
 		#
-		if cmd.startswith(":") and cmd != ":":
+		if cmd.startswith(":") and cmd != ":":								
 																			# build record
 			newFunc = { "name":cmd[1:],"page":self.binary.getCodePage(),"address":self.binary.getCodeAddress() }			
 			if newFunc["name"] in self.dictionary:							# check duplication
@@ -114,8 +116,17 @@ class Compiler(object):
 			self.dictionary[newFunc["name"]] = newFunc						# add to compiler dict
 			if not newFunc["name"].startswith("_"): 						# add to binary if not _
 				self.binary.addDictionary(newFunc["name"],newFunc["page"],newFunc["address"])
+			if newFunc["name"] == "main":									# main word ?
+				self.binary.setBoot(newFunc["page"],newFunc["address"]+3)	# +3 for code not header
 			self.binary.cByte(0xCD)											# call
 			self.binary.cWord(self.standardHeader+3)						# +3 for code not header
+			return
+		#
+		if cmd == "variable":
+			vh = self.variableHandler + 3									# replacement
+			self.binary.write(self.binary.getCodePage(),self.binary.getCodeAddress()-2,vh & 255)
+			self.binary.write(self.binary.getCodePage(),self.binary.getCodeAddress()-1,vh >> 8)
+			self.binary.cWord(0)
 			return
 		#
 		if cmd == "compiles>":
@@ -132,6 +143,7 @@ class Compiler(object):
 				raise CompilerException("Word {0} cannot be compiled.".format(cmd))
 																			# get the call to compile
 			compExec = self.binary.read(page,address+1)+self.binary.read(page,address+2)*256-3
+
 			if compExec == self.standardHeader:								# standard (callable routine)
 				self.binary.cByte(0xCD)
 				self.binary.cWord(address+3)
@@ -141,6 +153,10 @@ class Compiler(object):
 				assert count < 8
 				for i in range(0,count):									# copy each byte
 					self.binary.cByte(self.binary.read(page,address+i+4))
+
+			elif compExec == self.variableHandler:							# variable word.
+				self.loadConstant(address+3)
+
 			else:															# some other wierd word.
 				raise CompilerException("Unknown compilation code for "+cmd)
 			return
@@ -201,10 +217,15 @@ if __name__ == "__main__":
 		10 for i next
 		:test 42 ;
 		test 4 test
+		:v1 variable
+		v1
+		:main 32766 1 console.hex! halt
 """.split("\n")
 	cc = Compiler()
 	cc.compileArray(src)
 	cc.binary.save()
 
-#TODO: 	main() assignment (and main code in kernel)
+# TODO:
 #		file compilation
+#		debug routine 
+#		error handling.

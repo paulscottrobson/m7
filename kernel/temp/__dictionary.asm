@@ -383,6 +383,12 @@
     db    19
     db    "sys.stdmacroroutine"
 ; ----------------------------------------
+    db    24
+    db    FirstCodePage
+    dw    def_73_79_73_2e_76_61_72_69_61_62_6c_65_72_6f_75_74_69_6e_65
+    db    19
+    db    "sys.variableroutine"
+; ----------------------------------------
     db    8
     db    FirstCodePage
     dw    def_78_6f_72
